@@ -1,0 +1,34 @@
+* Timeout: Sometimes Emacs needs one
+
+=timeout= is a small library to help you throttle or debounce elisp function calls.  See [[https://karthinks.com/software/cool-your-heels-emacs][this write-up]] for an introduction and potential uses.
+
+It's actually tiny, just a couple of functions.
+
+*** To use this library:
+
+You can throttle an elisp function =func= to run at most once every 2 seconds:
+#+begin_src emacs-lisp
+(timeout-throttle! 'func 2.0)
+#+end_src
+
+To reset =func=:
+#+begin_src emacs-lisp
+(timeout-throttle! 'func 0.0)
+#+end_src
+
+When the call is a noop, a throttled function will return the same result as the last successful run.
+
+You can debounce an elisp function =func= to run after an uninterrupted delay of 0.5 seconds:
+#+begin_src emacs-lisp
+(timeout-debounce! 'func 0.5)
+#+end_src
+
+To reset =func=:
+#+begin_src emacs-lisp
+(timeout-debounce! 'func 0.0)
+#+end_src
+
+By default a debounced function returns =nil= at call time.  To change this, run:
+#+begin_src emacs-lisp
+(timeout-debounce! 'func 0.5 'some-return-value)
+#+end_src 
