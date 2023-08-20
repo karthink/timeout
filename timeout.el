@@ -67,18 +67,18 @@ This is intended for use as function advice."
         (delay (or delay 0.50)))
     (lambda (orig-fn &rest args)
       "Debounce calls to this function."
-      (when (timerp debounce-timer)
-        (cancel-timer debounce-timer))
-      (prog1 default
-        (setq debounce-timer
-              (run-with-idle-timer
-               delay nil
-               (lambda (buf)
-                 (cancel-timer debounce-timer)
-                 (setq debounce-timer nil)
-                 (with-current-buffer buf
-                   (setq result (apply orig-fn args))))
-               (current-buffer)))))))
+      (if (timerp debounce-timer)
+          (timer-set-idle-time debounce-timer delay)
+        (prog1 default
+          (setq debounce-timer
+                (run-with-idle-timer
+                 delay nil
+                 (lambda (buf)
+                   (cancel-timer debounce-timer)
+                   (setq debounce-timer nil)
+                   (with-current-buffer buf
+                     (setq result (apply orig-fn args))))
+                 (current-buffer))))))))
 
 ;;;###autoload
 (defun timeout-debounce! (func &optional delay default)
