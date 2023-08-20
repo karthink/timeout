@@ -45,7 +45,7 @@ function advice."
         (result))
     (lambda (orig-fn &rest args)
       "Throttle calls to this function."
-      (if (and throttle-timer (timerp throttle-timer))
+      (if (timerp throttle-timer)
           result
         (prog1
             (setq result (apply orig-fn args))
@@ -67,7 +67,7 @@ This is intended for use as function advice."
         (delay (or delay 0.50)))
     (lambda (orig-fn &rest args)
       "Debounce calls to this function."
-      (when (and debounce-timer (timerp debounce-timer))
+      (when (timerp debounce-timer)
         (cancel-timer debounce-timer))
       (prog1 default
         (setq debounce-timer
