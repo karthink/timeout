@@ -77,7 +77,7 @@ This is intended for use as function advice."
                    (cancel-timer debounce-timer)
                    (setq debounce-timer nil)
                    (with-current-buffer buf
-                     (setq result (apply orig-fn args))))
+                     (apply orig-fn args)))
                  (current-buffer))))))))
 
 ;;;###autoload
@@ -92,7 +92,7 @@ DELAY defaults to 0.5 seconds. Using a delay of 0 resets the
 function.
 
 DEFAULT is the immediate return value of the function when called."
-  (if (= delay 0)
+  (if (and delay (= delay 0))
       (advice-remove func 'debounce)
     (advice-add func :around (timeout--debounce-advice delay default)
                 '((name . debounce)
