@@ -38,7 +38,7 @@
 (defun timeout--throttle-advice (&optional timeout)
   "Return a function that throttles its argument function.
 
-THROTTLE defaults to 1.0 seconds. This is intended for use as
+TIMEOUT defaults to 1.0 seconds.  This is intended for use as
 function advice."
   (let ((throttle-timer)
         (timeout (or timeout 1.0))
@@ -85,10 +85,10 @@ This is intended for use as function advice."
   "Debounce FUNC by DELAY seconds.
 
 This advises FUNC, when called (interactively or from code), to
-run after DELAY seconds. If FUNC is called again within this time,
+run after DELAY seconds.   If FUNC is called again within this time,
 the timer is reset.
 
-DELAY defaults to 0.5 seconds. Using a delay of 0 resets the
+DELAY defaults to 0.5 seconds.   Using a delay of 0 resets the
 function.
 
 DEFAULT is the immediate return value of the function when called."
@@ -105,7 +105,7 @@ DEFAULT is the immediate return value of the function when called."
 This advises FUNC so that it can run no more than once every
 THROTTLE seconds.
 
-THROTTLE defaults to 1.0 seconds. Using a throttle of 0 resets the
+THROTTLE defaults to 1.0 seconds.  Using a throttle of 0 resets the
 function."
   (if (= throttle 0)
       (advice-remove func 'throttle)
