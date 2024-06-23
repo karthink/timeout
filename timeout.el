@@ -1,9 +1,12 @@
-;;; timeout.el --- throttle or debounce elisp functions  -*- lexical-binding: t; -*-
+;;; timeout.el --- Throttle or debounce elisp functions  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 ;; Keywords: convenience, extensions
+;; Version: 1.0
+;; Package-Requires: ((emacs "24.4"))
+;; URL: https://github.com/karthink/timeout
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
