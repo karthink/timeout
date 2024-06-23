@@ -79,7 +79,9 @@ This is intended for use as function advice."
                  (lambda (buf)
                    (cancel-timer debounce-timer)
                    (setq debounce-timer nil)
-                   (with-current-buffer buf
+                   (if (buffer-live-p buf)
+                       (with-current-buffer buf
+                         (apply orig-fn args))
                      (apply orig-fn args)))
                  (current-buffer))))))))
 
