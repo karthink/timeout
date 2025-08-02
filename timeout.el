@@ -51,20 +51,21 @@
 ;;; Code:
 (require 'nadvice)
 
-(defun timeout--throttle-advice (&optional timeout)
+(defun timeout--throttle-advice (&optional timeout default)
   "Return a function that throttles its argument function.
 
-TIMEOUT defaults to 1.0 seconds.  This is intended for use as
-function advice."
+TIMEOUT defaults to 1.0 seconds.  DEFAULT is the immediate return value
+of the function when called.
+
+This is intended for use as function advice."
   (let ((throttle-timer)
         (timeout (or timeout 1.0))
-        (result))
+        (result default))
     (lambda (orig-fn &rest args)
       "Throttle calls to this function."
-      (if (timerp throttle-timer)
-          result
-        (prog1
-            (setq result (apply orig-fn args))
+      (prog1 result
+        (unless (and throttle-timer (timerp throttle-timer))
+          (setq result (apply orig-fn args))
           (setq throttle-timer
                 (run-with-timer
                  timeout nil
@@ -117,17 +118,17 @@ DEFAULT is the immediate return value of the function when called."
                   (depth . -99)))))
 
 ;;;###autoload
-(defun timeout-throttle! (func &optional throttle)
+(defun timeout-throttle! (func &optional throttle default)
   "Throttle FUNC by THROTTLE seconds.
 
-This advises FUNC so that it can run no more than once every
-THROTTLE seconds.
+This advises FUNC so that it can run no more than once every THROTTLE
+seconds.  THROTTLE defaults to 1.0 seconds.  Using a throttle of 0
+resets the function.
 
-THROTTLE defaults to 1.0 seconds.  Using a throttle of 0 resets the
-function."
+DEFAULT is the immediate return value of the function when called."
   (if (= throttle 0)
       (advice-remove func 'throttle)
-    (advice-add func :around (timeout--throttle-advice throttle)
+    (advice-add func :around (timeout--throttle-advice throttle default)
                 '((name . throttle)
                   (depth . -98)))))
 
@@ -148,30 +149,30 @@ value of the function when called."
             (format "\n\nThrottle calls to this function by %f seconds" throttle)))
           (interactive (advice-eval-interactive-spec
                         (cadr (interactive-form func))))
-          (if (and throttle-timer (timerp throttle-timer))
-              result
+          (prog1 result
+            (unless (and throttle-timer (timerp throttle-timer))
+              (setq result (apply func args))
+              (setq throttle-timer
+                    (run-with-timer
+                     throttle nil
+                     (lambda ()
+                       (cancel-timer throttle-timer)
+                       (setq throttle-timer nil)))))))
+      ;; NON-INTERACTIVE version
+      (lambda (&rest args)
+        (:documentation
+         (concat
+          (documentation func)
+          (format "\n\nThrottle calls to this function by %f seconds" throttle)))
+        (prog1 result
+          (unless (and throttle-timer (timerp throttle-timer))
             (setq result (apply func args))
             (setq throttle-timer
                   (run-with-timer
                    throttle nil
                    (lambda ()
                      (cancel-timer throttle-timer)
-                     (setq throttle-timer nil))))))
-      ;; NON-INTERACTIVE version
-      (lambda (&rest args)
-        (:documentation
-           (concat
-            (documentation func)
-            (format "\n\nThrottle calls to this function by %f seconds" throttle)))
-        (if (and throttle-timer (timerp throttle-timer))
-            result
-          (setq result (apply func args))
-          (setq throttle-timer
-                (run-with-timer
-                 throttle nil
-                 (lambda ()
-                   (cancel-timer throttle-timer)
-                   (setq throttle-timer nil)))))))))
+                     (setq throttle-timer nil))))))))))
 
 (defun timeout-debounce (func &optional delay default)
   "Return a debounced version of function FUNC.
