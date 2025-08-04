@@ -84,9 +84,9 @@ This is intended for use as function advice."
         (delay (or delay 0.50)))
     (lambda (orig-fn &rest args)
       "Debounce calls to this function."
-      (if (timerp debounce-timer)
-          (timer-set-idle-time debounce-timer delay)
-        (prog1 default
+      (prog1 default
+        (if (timerp debounce-timer)
+            (timer-set-idle-time debounce-timer delay)
           (setq debounce-timer
                 (run-with-idle-timer
                  delay nil
@@ -190,9 +190,9 @@ value of the function when called."
             (format "\n\nDebounce calls to this function by %f seconds" delay)))
           (interactive (advice-eval-interactive-spec
                         (cadr (interactive-form func))))
-          (if (timerp debounce-timer)
-              (timer-set-idle-time debounce-timer delay)
-            (prog1 default
+          (prog1 default
+            (if (timerp debounce-timer)
+                (timer-set-idle-time debounce-timer delay)
               (setq debounce-timer
                     (run-with-idle-timer
                      delay nil
@@ -210,9 +210,9 @@ value of the function when called."
          (concat
           (documentation func)
           (format "\n\nDebounce calls to this function by %f seconds" delay)))
-        (if (timerp debounce-timer)
-            (timer-set-idle-time debounce-timer delay)
-          (prog1 default
+        (prog1 default
+          (if (timerp debounce-timer)
+              (timer-set-idle-time debounce-timer delay)
             (setq debounce-timer
                   (run-with-idle-timer
                    delay nil
