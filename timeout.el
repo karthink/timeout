@@ -93,10 +93,11 @@ This is intended for use as function advice."
                  (lambda (buf)
                    (cancel-timer debounce-timer)
                    (setq debounce-timer nil)
-                   (if (buffer-live-p buf)
-                       (with-current-buffer buf
-                         (apply orig-fn args))
-                     (apply orig-fn args)))
+                   (setq default
+                         (if (buffer-live-p buf)
+                             (with-current-buffer buf
+                               (apply orig-fn args))
+                           (apply orig-fn args))))
                  (current-buffer))))))))
 
 ;;;###autoload
@@ -199,10 +200,11 @@ value of the function when called."
                      (lambda (buf)
                        (cancel-timer debounce-timer)
                        (setq debounce-timer nil)
-                       (if (buffer-live-p buf)
-                           (with-current-buffer buf
-                             (apply func args))
-                         (apply func args)))
+                       (setq default
+                             (if (buffer-live-p buf)
+                                 (with-current-buffer buf
+                                   (apply func args))
+                               (apply func args))))
                      (current-buffer))))))
       ;; NON-INTERACTIVE version
       (lambda (&rest args)
@@ -219,10 +221,11 @@ value of the function when called."
                    (lambda (buf)
                      (cancel-timer debounce-timer)
                      (setq debounce-timer nil)
-                     (if (buffer-live-p buf)
-                         (with-current-buffer buf
-                           (apply func args))
-                       (apply func args)))
+                     (setq default
+                           (if (buffer-live-p buf)
+                               (with-current-buffer buf
+                                 (apply func args))
+                             (apply func args))))
                    (current-buffer)))))))))
 
 (provide 'timeout)
