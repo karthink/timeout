@@ -1,4 +1,4 @@
-;;; timeout.el --- Throttle or debounce elisp functions  -*- lexical-binding: t; -*-
+;;; timeout.el --- Throttle or debounce Elisp functions  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Karthik Chikmagalur
 
@@ -23,8 +23,8 @@
 
 ;;; Commentary:
 
-;; timeout is a small elisp library that provides higher order functions to
-;; throttle or debounce elisp functions.  This is useful for corraling
+;; timeout is a small Elisp library that provides higher order functions to
+;; throttle or debounce Elisp functions.  This is useful for corralling
 ;; over-eager code that:
 ;; (i) is slow and blocks Emacs, and
 ;; (ii) does not provide customization options to limit how often it runs,
@@ -54,8 +54,9 @@
 (defun timeout--throttle-advice (&optional timeout default)
   "Return a function that throttles its argument function.
 
-TIMEOUT defaults to 1.0 seconds.  DEFAULT is the immediate return value
-of the function when called.
+TIMEOUT defaults to 1 second.  The function returns immediately with
+value DEFAULT when called the first time.  On future invocations, the
+result from the previous call is returned.
 
 This is intended for use as function advice."
   (let ((throttle-timer)
@@ -76,8 +77,9 @@ This is intended for use as function advice."
 (defun timeout--debounce-advice (&optional delay default)
   "Return a function that debounces its argument function.
 
-DELAY defaults to 0.50 seconds.  DEFAULT is the immediate return
-value of the function when called.
+DELAY defaults to 0.50 seconds.  The function returns immediately with
+value DEFAULT when called the first time.  On future invocations, the
+result from the previous call is returned.
 
 This is intended for use as function advice."
   (let ((debounce-timer nil)
@@ -102,16 +104,18 @@ This is intended for use as function advice."
 
 ;;;###autoload
 (defun timeout-debounce! (func &optional delay default)
-  "Debounce FUNC by DELAY seconds.
+  "Debounce FUNC by making it run DELAY seconds after it is called.
 
 This advises FUNC, when called (interactively or from code), to
 run after DELAY seconds.   If FUNC is called again within this time,
 the timer is reset.
 
-DELAY defaults to 0.5 seconds.   Using a delay of 0 resets the
-function.
+DELAY defaults to 0.5 seconds.  Using a delay of 0 removes any
+debounce advice.
 
-DEFAULT is the immediate return value of the function when called."
+The function returns immediately with value DEFAULT when called the
+first time.  On future invocations, the result from the previous call is
+returned."
   (if (and delay (= delay 0))
       (advice-remove func 'debounce)
     (advice-add func :around (timeout--debounce-advice delay default)
@@ -120,13 +124,14 @@ DEFAULT is the immediate return value of the function when called."
 
 ;;;###autoload
 (defun timeout-throttle! (func &optional throttle default)
-  "Throttle FUNC by THROTTLE seconds.
+  "Make FUNC run no more frequently than once every THROTTLE seconds.
 
-This advises FUNC so that it can run no more than once every THROTTLE
-seconds.  THROTTLE defaults to 1.0 seconds.  Using a throttle of 0
-resets the function.
+THROTTLE defaults to 1 second.  Using a throttle of 0 removes any
+throttle advice.
 
-DEFAULT is the immediate return value of the function when called."
+The function returns immediately with value DEFAULT when called the
+first time.  On future invocations, the result from the previous call is
+returned."
   (if (= throttle 0)
       (advice-remove func 'throttle)
     (advice-add func :around (timeout--throttle-advice throttle default)
@@ -136,8 +141,12 @@ DEFAULT is the immediate return value of the function when called."
 (defun timeout-throttle (func &optional throttle default)
   "Return a throttled version of function FUNC.
 
-THROTTLE defaults to 1 second.  DEFAULT is the immediate return
-value of the function when called."
+The throttled function runs no more frequently than once every THROTTLE
+seconds.  THROTTLE defaults to 1 second.
+
+The function returns immediately with value DEFAULT when called the
+first time.  On future invocations, the result from the previous call is
+returned."
   (let ((throttle-timer nil)
         (throttle (or throttle 1))
         (result default))
@@ -178,8 +187,12 @@ value of the function when called."
 (defun timeout-debounce (func &optional delay default)
   "Return a debounced version of function FUNC.
 
-DELAY defaults to 0.5 seconds.  DEFAULT is the immediate return
-value of the function when called."
+The debounced function runs DELAY seconds after it is called.  DELAY
+defaults to 0.5 seconds.
+
+The function returns immediately with value DEFAULT when called the
+first time.  On future invocations, the result from the previous call is
+returned."
   (let ((debounce-timer nil)
         (delay (or delay 0.50)))
     (if (commandp func)
