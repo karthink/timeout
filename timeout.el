@@ -4,7 +4,7 @@
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 ;; Keywords: convenience, extensions
-;; Version: 1.0
+;; Version: 2.0
 ;; Package-Requires: ((emacs "24.4"))
 ;; URL: https://github.com/karthink/timeout
 
@@ -30,26 +30,29 @@
 ;; (ii) does not provide customization options to limit how often it runs,
 ;;
 ;; To throttle a function FUNC to run no more than once every 2 seconds, run
-;; (timeout-throttle! 'func 2.0)
+;; (timeout-throttle 'func 2.0)
 ;; 
 ;; To debounce a function FUNC to run after a delay of 0.3 seconds, run
-;; (timeout-debounce! 'func 0.3)
+;; (timeout-debounce 'func 0.3)
 ;;
 ;; To create a new throttled or debounced version of FUNC instead, run
 ;;
-;; (timeout-throttle 'func 2.0)
-;; (timeout-debounce 'func 0.3)
+;; (timeout-throttled-func 'func 2.0)
+;; (timeout-debounced-func 'func 0.3)
 ;;
 ;; You can bind this via fset or defalias:
 ;;
-;; (defalias 'throttled-func (timeout-throttle 'func 2.0))
-;; (fset     'throttled-func (timeout-throttle 'func 2.0))
+;; (defalias 'throttled-func (timeout-throttled-func 'func 2.0))
+;; (fset     'throttled-func (timeout-throttled-func 'func 2.0))
 ;;
 ;; The interactive spec and documentation of FUNC is carried over to the new
 ;; function.
 
 ;;; Code:
 (require 'nadvice)
+
+(define-obsolete-function-alias 'timeout-throttle! 'timeout-throttle "v2.0")
+(define-obsolete-function-alias 'timeout-debounce! 'timeout-debounce "v2.0")
 
 (defun timeout--throttle-advice (&optional timeout)
   "Return a function that throttles its argument function.
@@ -104,7 +107,7 @@ This is intended for use as function advice."
                  (current-buffer))))))))
 
 ;;;###autoload
-(defun timeout-debounce! (func &optional delay default)
+(defun timeout-debounce (func &optional delay default)
   "Debounce FUNC by making it run DELAY seconds after it is called.
 
 This advises FUNC, when called (interactively or from code), to
@@ -124,7 +127,7 @@ returned."
                   (depth . -99)))))
 
 ;;;###autoload
-(defun timeout-throttle! (func &optional throttle)
+(defun timeout-throttle (func &optional throttle)
   "Make FUNC run no more frequently than once every THROTTLE seconds.
 
 THROTTLE defaults to 1 second.  Using a throttle of 0 removes any
@@ -138,7 +141,7 @@ previous successful call is returned."
                 '((name . throttle)
                   (depth . -98)))))
 
-(defun timeout-throttle (func &optional throttle)
+(defun timeout-throttled-func (func &optional throttle)
   "Return a throttled version of function FUNC.
 
 The throttled function runs no more frequently than once every THROTTLE
@@ -183,7 +186,7 @@ previous successful call is returned."
                      (cancel-timer throttle-timer)
                      (setq throttle-timer nil))))))))))
 
-(defun timeout-debounce (func &optional delay default)
+(defun timeout-debounced-func (func &optional delay default)
   "Return a debounced version of function FUNC.
 
 The debounced function runs DELAY seconds after it is called.  DELAY

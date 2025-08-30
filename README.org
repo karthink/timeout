@@ -1,5 +1,19 @@
 * Timeout: Sometimes Emacs needs one
 
+------
+
+*Breaking Change*: This library is being upstreamed into Emacs.  For consistency with Elisp naming guidelines, the names of the functions have been changed, and the version has been bumped to v2.0.  Sorry about that.
+
+The naming changes are:
+#+begin_src emacs-lisp
+timeout-throttle  -> timeout-throttled-func
+timeout-throttle  -> timeout-throttled-func
+timeout-throttle! -> timeout-throttle
+timeout-throttle! -> timeout-throttle
+#+end_src
+
+------
+
 =timeout= is a small library to help you throttle or debounce elisp function calls.  See [[https://karthinks.com/software/cool-your-heels-emacs][this write-up]] for an introduction and potential uses.
 
 It's actually tiny, just a couple of functions.
@@ -8,24 +22,24 @@ It's actually tiny, just a couple of functions.
 
 You can throttle an elisp function =func= to run at most once every 2 seconds:
 #+begin_src emacs-lisp
-(timeout-throttle! 'func 2.0)
+(timeout-throttle 'func 2.0)
 #+end_src
 
 To reset =func=:
 #+begin_src emacs-lisp
-(timeout-throttle! 'func 0.0)
+(timeout-throttle 'func 0.0)
 #+end_src
 
 When the call is a noop, a throttled function will return the same result as the last successful run.
 
 You can debounce an elisp function =func= to run after an uninterrupted delay of 0.5 seconds:
 #+begin_src emacs-lisp
-(timeout-debounce! 'func 0.5)
+(timeout-debounce 'func 0.5)
 #+end_src
 
 To reset =func=:
 #+begin_src emacs-lisp
-(timeout-debounce! 'func 0.0)
+(timeout-debounce 'func 0.0)
 #+end_src
 
 By default a debounced function returns =nil= at call time.  To change this, run:
@@ -36,12 +50,12 @@ By default a debounced function returns =nil= at call time.  To change this, run
 Instead of advising =func=, you can also create new throttled or debounced versions of it with =timeout-throttle= and =timeout-debounce=:
 
 #+begin_src emacs-lisp
-(timeout-throttle 'func 2.0)
-(timeout-debounce 'func 0.5)
+(timeout-throttled-func 'func 2.0)
+(timeout-debounced-func 'func 0.5)
 #+end_src
 
 These return anonymous functions which you can bind to a symbol with =defalias= or =fset=:
 #+begin_src emacs-lisp
-(defalias 'throttled-func (timeout-throttle 'func 2.0))
-(fset     'throttled-func (timeout-throttle 'func 2.0))
+(defalias 'throttled-func (timeout-throttled-func 'func 2.0))
+(fset     'throttled-func (timeout-throttled-func 'func 2.0))
 #+end_src
