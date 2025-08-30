@@ -51,17 +51,18 @@
 ;;; Code:
 (require 'nadvice)
 
-(defun timeout--throttle-advice (&optional timeout default)
+(defun timeout--throttle-advice (&optional timeout)
   "Return a function that throttles its argument function.
 
-TIMEOUT defaults to 1 second.  The function returns immediately with
-value DEFAULT when called the first time.  On future invocations, the
-result from the previous call is returned.
+TIMEOUT defaults to 1 second.
+
+When FUNC does not run because of the throttle, the result from the
+previous successful call is returned.
 
 This is intended for use as function advice."
   (let ((throttle-timer)
         (timeout (or timeout 1.0))
-        (result default))
+        (result))
     (lambda (orig-fn &rest args)
       "Throttle calls to this function."
       (prog1 result
@@ -123,33 +124,31 @@ returned."
                   (depth . -99)))))
 
 ;;;###autoload
-(defun timeout-throttle! (func &optional throttle default)
+(defun timeout-throttle! (func &optional throttle)
   "Make FUNC run no more frequently than once every THROTTLE seconds.
 
 THROTTLE defaults to 1 second.  Using a throttle of 0 removes any
 throttle advice.
 
-The function returns immediately with value DEFAULT when called the
-first time.  On future invocations, the result from the previous call is
-returned."
+When FUNC does not run because of the throttle, the result from the
+previous successful call is returned."
   (if (and throttle (= throttle 0))
       (advice-remove func 'throttle)
-    (advice-add func :around (timeout--throttle-advice throttle default)
+    (advice-add func :around (timeout--throttle-advice throttle)
                 '((name . throttle)
                   (depth . -98)))))
 
-(defun timeout-throttle (func &optional throttle default)
+(defun timeout-throttle (func &optional throttle)
   "Return a throttled version of function FUNC.
 
 The throttled function runs no more frequently than once every THROTTLE
 seconds.  THROTTLE defaults to 1 second.
 
-The function returns immediately with value DEFAULT when called the
-first time.  On future invocations, the result from the previous call is
-returned."
+When FUNC does not run because of the throttle, the result from the
+previous successful call is returned."
   (let ((throttle-timer nil)
         (throttle (or throttle 1))
-        (result default))
+        (result))
     (if (commandp func)
         ;; INTERACTIVE version
         (lambda (&rest args)
