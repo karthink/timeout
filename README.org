@@ -44,7 +44,7 @@ To reset =func=:
 
 By default a debounced function returns =nil= at call time.  To change this, run:
 #+begin_src emacs-lisp
-(timeout-debounce! 'func 0.5 'some-return-value)
+(timeout-debounce 'func 0.5 'some-return-value)
 #+end_src 
 
 Instead of advising =func=, you can also create new throttled or debounced versions of it with =timeout-throttle= and =timeout-debounce=:
