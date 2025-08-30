@@ -132,7 +132,7 @@ throttle advice.
 The function returns immediately with value DEFAULT when called the
 first time.  On future invocations, the result from the previous call is
 returned."
-  (if (= throttle 0)
+  (if (and throttle (= throttle 0))
       (advice-remove func 'throttle)
     (advice-add func :around (timeout--throttle-advice throttle default)
                 '((name . throttle)
