@@ -1,6 +1,6 @@
 ;;; timeout.el --- Throttle or debounce Elisp functions  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2023  Karthik Chikmagalur
+;; Copyright (C) 2023-2025  Free Software Foundation, Inc.
 
 ;; Author: Karthik Chikmagalur <karthikchikmagalur@gmail.com>
 ;; Keywords: convenience, extensions
