@@ -143,7 +143,9 @@ first time.  On future invocations, the result from the previous call is
 returned."
   (if (and delay (eq delay 0))
       (advice-remove func 'debounce)
-    (advice-add func :around (timeout--debounce-advice delay default)
+    (advice-add func :around
+                (defalias (intern (concat "timeout-debounce-on-" (symbol-name func)))
+                  (timeout--debounce-advice delay))
                 '((name . debounce)
                   (depth . -99)))))
 
@@ -160,7 +162,9 @@ When FUNC does not run because of the throttle, the result from the
 previous successful call is returned."
   (if (and throttle (eq throttle 0))
       (advice-remove func 'throttle)
-    (advice-add func :around (timeout--throttle-advice throttle)
+    (advice-add func :around
+                (defalias (intern (concat "timeout-throttle-on-" (symbol-name func)))
+                  (timeout--throttle-advice throttle))
                 '((name . throttle)
                   (depth . -98)))))
 
