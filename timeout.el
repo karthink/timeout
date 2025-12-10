@@ -85,7 +85,7 @@ This is intended for use as function advice."
         (result))
     (lambda (orig-fn &rest args)
       "Throttle calls to this function."
-      (prog1 result
+      (progn
         (unless (and throttle-timer (timerp throttle-timer))
           (setq result (apply orig-fn args))
           (setq throttle-timer
@@ -93,7 +93,8 @@ This is intended for use as function advice."
                  (timeout--eval-value timeout-value) nil
                  (lambda ()
                    (cancel-timer throttle-timer)
-                   (setq throttle-timer nil)))))))))
+                   (setq throttle-timer nil)))))
+        result))))
 
 (defun timeout--debounce-advice (&optional delay default)
   "Return a function that debounces its argument function.
@@ -187,7 +188,7 @@ previous successful call is returned."
             "\n\nThrottle calls to this function"))
           (interactive (advice-eval-interactive-spec
                         (cadr (interactive-form func))))
-          (prog1 result
+          (progn
             (unless (and throttle-timer (timerp throttle-timer))
               (setq result (apply func args))
               (setq throttle-timer
@@ -195,14 +196,15 @@ previous successful call is returned."
                      (timeout--eval-value throttle-value) nil
                      (lambda ()
                        (cancel-timer throttle-timer)
-                       (setq throttle-timer nil)))))))
+                       (setq throttle-timer nil)))))
+            result))
       ;; NON-INTERACTIVE version
       (lambda (&rest args)
         (:documentation
          (concat
           (documentation func)
           "\n\nThrottle calls to this function"))
-        (prog1 result
+        (progn
           (unless (and throttle-timer (timerp throttle-timer))
             (setq result (apply func args))
             (setq throttle-timer
@@ -210,7 +212,8 @@ previous successful call is returned."
                    (timeout--eval-value throttle-value) nil
                    (lambda ()
                      (cancel-timer throttle-timer)
-                     (setq throttle-timer nil))))))))))
+                     (setq throttle-timer nil)))))
+          result)))))
 
 (defun timeout-debounced-func (func &optional delay default)
   "Return a debounced version of function FUNC.
